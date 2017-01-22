@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:text="HERE IS SOME TEXT@!!!!@!@">
 
 </TextView>

@@ -1,6 +1,9 @@
 package com.assignment.mike.hermit.data;
 
 import android.content.ContentValues;
+import android.database.Cursor;
+
+import com.assignment.mike.hermit.TwitterWallActivity;
 
 /**
  * Created by Mike on 1/22/17.
@@ -30,6 +33,20 @@ public class Tweet {
             setNumRetweets((Long)content.get(TweetContract.TweetEntry.COLUMN_NUM_RETWEETS));
         }
 
+    }
+
+    public Tweet (Cursor cursor) {
+        if (cursor != null) {
+            setUserId(cursor.getLong(TwitterWallActivity.COL_TWEET_ID));
+            setHandle(cursor.getString(TwitterWallActivity.COL_TWEET_HANDLE));
+            setDisplayName(cursor.getString(TwitterWallActivity.COL_TWEET_DISPLAY_NAME));
+            setIconLocation(cursor.getString(TwitterWallActivity.COL_TWEET_USER_ICON));
+            setPostTimestamp(cursor.getLong(TwitterWallActivity.COL_TWEET_POST_TIMESTAMP));
+            setContent(cursor.getString(TwitterWallActivity.COL_TWEET_CONTENT));
+            setNumLikes(cursor.getLong(TwitterWallActivity.COL_TWEET_NUM_LIKES));
+            setNumReplies(cursor.getLong(TwitterWallActivity.COL_TWEET_NUM_REPLIES));
+            setNumRetweets(cursor.getLong(TwitterWallActivity.COL_TWEET_NUM_RETWEETS));
+        }
     }
 
     public String getContent() {

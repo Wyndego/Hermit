@@ -1,6 +1,7 @@
 package com.assignment.mike.hermit.data;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import java.util.Random;
 
@@ -11,13 +12,16 @@ import java.util.Random;
  *
  * Created by Mike on 1/22/17.
  */
-public class TweetDataCreator  {
+public class TweetDataUtility {
 
-    private static final String LOG_TAG = TweetDataCreator.class.getSimpleName();
+    private static final String LOG_TAG = TweetDataUtility.class.getSimpleName();
     private static final String DUMMY_TEXT_FILE = "dummy_text.txt";
     private static final int MAX_HANDLE_LENGTH = 20;
     private static final int MAX_DISPLAY_NAME_LENGTH = 20;
     private static final int MAX_CONTENT_LENGTH = 135;
+
+    public static final long WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
+
     private static final String[] ICON_LIST = new String[] {
             "Sun",
             "Moon",
@@ -32,12 +36,17 @@ public class TweetDataCreator  {
 
     public static ContentValues generateRandomTweet() {
         Random rand = new Random();
+
+        long currentTime = System.currentTimeMillis();
+        long earliestTimestampToGenerate = currentTime - WEEK_IN_MS;
+        long timestamp = earliestTimestampToGenerate + (Math.abs(rand.nextLong()) % (currentTime - earliestTimestampToGenerate) );
+
         return generateTweet(
                 Math.abs(rand.nextLong()),
                 getRandomPartionOfTestData(MAX_DISPLAY_NAME_LENGTH),
                 "@" + getRandomPartionOfTestData(MAX_HANDLE_LENGTH).trim(),
                 ICON_LIST[rand.nextInt(ICON_LIST.length)],
-                Math.abs(rand.nextLong()),
+                timestamp,
                 getRandomPartionOfTestData(MAX_CONTENT_LENGTH),
                 rand.nextLong() % 5000L,
                 rand.nextLong() % 5000L,
@@ -90,6 +99,12 @@ public class TweetDataCreator  {
         for (int i = 0; i < tweets.length; i++) {
             result[i] = convertTweetConentValueToTweet(tweets[i]);
         }
+
+        return result;
+    }
+
+    public static Tweet convertCursorRowToTweet(Cursor cursor) {
+        Tweet result = new Tweet(cursor);
 
         return result;
     }
