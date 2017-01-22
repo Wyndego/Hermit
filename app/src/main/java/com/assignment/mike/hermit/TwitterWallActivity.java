@@ -1,5 +1,6 @@
 package com.assignment.mike.hermit;
 
+import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.assignment.mike.hermit.data.TweetContract;
+import com.assignment.mike.hermit.data.TweetDataCreator;
 
 import java.util.ArrayList;
 
@@ -77,21 +81,18 @@ public class TwitterWallActivity
         protected String[] doInBackground(Void... params) {
             Log.d(LOG_TAG, "Fetching the tweet data from HTTP call.");
 
-            String[] data = {
-                    "Mon 6/23 - Sunny - 31/17",
-                    "Tue 6/24 - Foggy - 21/8",
-                    "Wed 6/25 - Cloudy - 22/17",
-                    "Thurs 6/26 - Rainy - 18/11",
-                    "Fri 6/27 - Foggy - 21/10",
-                    "Sat 6/28 - TRAPPED IN WEATHERSTATION - 23/18",
-                    "Sun 6/29 - Sunny - 20/7",
-                    "A lot more",
-                    "Stuff to come",
-                    "in this list",
-                    "soon"
-            };
+            ContentValues[] data = TweetDataCreator.generateRandomTweets(30);
 
-            return data;
+            // Now that we have the data, inert it to the Tweet DB.
+            getContentResolver().bulkInsert(
+                    TweetContract.TweetEntry.CONTENT_URI, data
+            );
+
+            String[] result = new String[data.length];
+            for (int i = 0; i < data.length; i++) {
+                result[i] = TweetDataCreator.convertTweetConentValueToTweet(data[i]).toString();
+            }
+            return result;
         }
 
         @Override
