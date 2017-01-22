@@ -31,30 +31,6 @@ public class MainActivity extends AppCompatActivity {
         mPasswordEditText = (EditText)findViewById(R.id.edit_password);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//
-//        int selectedMenuItem = item.getItemId();
-//        switch (selectedMenuItem) {
-//            case R.id.compose:
-//                Log.d(LOG_TAG, "Compose menu option selected");
-//                return true;
-//            case R.id.logout:
-//                Log.d(LOG_TAG, "Logout menu option selected");
-//                return true;
-//            default:
-//                Log.d(LOG_TAG, "Uknown menu item selected.");
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
-
     private void signIn() {
         Log.d(LOG_TAG, "Signing in");
 
