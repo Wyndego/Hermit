@@ -28,6 +28,7 @@ public class TweetDbHelper extends SQLiteOpenHelper {
                 " (" +
                 TweetContract.TweetEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 
+                TweetContract.TweetEntry.COLUMN_USER_ID + " INTEGER NOT NULL, " +
                 TweetContract.TweetEntry.COLUMN_HANDLE + " TEXT NOT NULL, " +
                 TweetContract.TweetEntry.COLUMN_DISPLAY_NAME + " TEXT NOT NULL, " +
                 TweetContract.TweetEntry.COLUMN_USER_ICON + " TEXT NOT NULL, " +

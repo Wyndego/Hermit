@@ -24,6 +24,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.assignment.mike.hermit.MainActivity" />
         </activity>
+
+        <provider
+            android:authorities="com.assignment.mike.hermit"
+            android:name=".data.TweetProvider"
+            android:exported="false"
+            android:syncable="true"/>
+
     </application>
 
 </manifest>

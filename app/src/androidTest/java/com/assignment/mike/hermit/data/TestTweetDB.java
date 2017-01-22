@@ -8,24 +8,15 @@ import android.test.AndroidTestCase;
 import org.junit.Before;
 
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
+import static com.assignment.mike.hermit.data.TweetDataTestUtils.validateCurrentRecord;
 
 /**
  * Created by Mike on 1/21/17.
  */
 
-public class TweetDbTest extends AndroidTestCase {
-    public static final String LOG_TAG = TweetDbTest.class.getSimpleName();
-
-    private final String DISPLAY_NAME = "Super Dave";
-    private final String HANDLE = "@sprDave";
-    private final String ICON_LOC = "http://some_img_loc.com";
-    private final long TWEET_TS = 123456789;
-    private final String TWEET_CONTENT = "This test tweet is less than 140 char.";
-    private final int NUM_LIKES = 2;
-    private final int NUM_RETWEETS = 5;
-    private final int NUM_REPLIES = 10;
+public class TestTweetDB extends AndroidTestCase {
+    public static final String LOG_TAG = TestTweetDB.class.getSimpleName();
 
     @Before
     public void setUp() throws Exception {
@@ -84,7 +75,7 @@ public class TweetDbTest extends AndroidTestCase {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         // Insert a record into the Tweet db
-        ContentValues tweetValues = createTweet();
+        ContentValues tweetValues = TweetDataTestUtils.createTweet();
         long tweetRecordId = db.insert(TweetContract.TweetEntry.TABLE_NAME, null, tweetValues);
         assertTrue(tweetRecordId != -1);
 
@@ -130,31 +121,4 @@ public class TweetDbTest extends AndroidTestCase {
         dbHelper.close();
     }
 
-    private void validateCurrentRecord(String error, Cursor valueCursor, ContentValues expectedValues) {
-        Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
-        for (Map.Entry<String, Object> entry : valueSet) {
-            String columnName = entry.getKey();
-            int idx = valueCursor.getColumnIndex(columnName);
-            assertFalse("Column '" + columnName + "' not found. " + error, idx == -1);
-            String expectedValue = entry.getValue().toString();
-            assertEquals("Value '" + entry.getValue().toString() +
-                    "' did not match the expected value '" +
-                    expectedValue + "'. " + error, expectedValue, valueCursor.getString(idx));
-        }
-    }
-
-    // Creates a test value for a tweet
-    private ContentValues createTweet() {
-        ContentValues tweetValues = new ContentValues();
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_DISPLAY_NAME, DISPLAY_NAME);
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_HANDLE, HANDLE);
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_USER_ICON, ICON_LOC);
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP, TWEET_TS);
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_CONTENT, TWEET_CONTENT);
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_NUM_LIKES, NUM_LIKES);
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_NUM_REPLIES, NUM_REPLIES);
-        tweetValues.put(TweetContract.TweetEntry.COLUMN_NUM_RETWEETS, NUM_RETWEETS);
-
-        return tweetValues;
-    }
 }
