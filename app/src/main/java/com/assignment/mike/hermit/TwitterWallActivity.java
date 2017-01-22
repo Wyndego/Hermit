@@ -2,14 +2,10 @@ package com.assignment.mike.hermit;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -19,12 +15,13 @@ import java.util.ArrayList;
  * Created by Mike on 1/21/17.
  */
 
-public class TweetFragment extends Fragment {
+public class TwitterWallActivity
+        extends AppCompatActivity {
 
-    private static final String LOG_TAG = TweetFragment.class.getSimpleName();
+    private static final String LOG_TAG = TwitterWallActivity.class.getSimpleName();
 
     private ArrayAdapter<String> mTweetAdapter;
-    public TweetFragment() {
+    public TwitterWallActivity() {
 
     }
 
@@ -32,12 +29,22 @@ public class TweetFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setHasOptionsMenu(true);
+        mTweetAdapter = new ArrayAdapter<String>(
+                this,
+                R.layout.list_item_tweet,
+                R.id.list_item_tweet_textview,
+                new ArrayList<String>()
+        );
+
+        setContentView(R.layout.fragment_main);
+        ListView listView = (ListView) findViewById(R.id.listview_tweet);
+        listView.setAdapter(mTweetAdapter);
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.tweet_fragment, menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.twitter_wall, menu);
+        return true;
     }
 
     @Override
@@ -50,32 +57,17 @@ public class TweetFragment extends Fragment {
                 FetchTweetTask fetchTweetTask = new FetchTweetTask();
                 fetchTweetTask.execute();
                 return true;
+            case R.id.compose:
+                Log.d(LOG_TAG, "Compose menu option selected");
+                return true;
+            case R.id.logout:
+                Log.d(LOG_TAG, "Logout menu option selected");
+                return true;
             default:
                 Log.d(LOG_TAG, "Uknown menu item selected.");
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-//        List<String> tweetData = new ArrayList<String>(Arrays.asList(data));
-        mTweetAdapter = new ArrayAdapter<String>(
-                getActivity(),
-                R.layout.list_item_tweet,
-                R.id.list_item_tweet_textview,
-                new ArrayList<String>()
-        );
-
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_tweet);
-        listView.setAdapter(mTweetAdapter);
-
-        // Now simulate the HTTP fetch of data:
-        String httpResult = "All the http data";
-
-        return rootView;
     }
 
     public class FetchTweetTask extends AsyncTask<Void, Void, String[]> {

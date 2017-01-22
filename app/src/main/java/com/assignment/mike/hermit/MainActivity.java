@@ -20,12 +20,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-//        if (savedInstanceState == null) {
-//            getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.container, new TweetFragment())
-//                    .commit();
-//        }
-
         final Button loginBtn = (Button) findViewById(R.id.btn_login);
         loginBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -70,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         // TODO - add user validation against a stubbed out API call.
 
         // Now go ahead and start the Twitter wall.
-        Intent goToTweetWallIntent = new Intent(this, TweetFragment.class);
+        Intent goToTweetWallIntent = new Intent(this, TwitterWallActivity.class);
         startActivity(goToTweetWallIntent);
     }
 }

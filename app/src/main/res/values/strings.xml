@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Hermit</string>
+    <string name="twitter_wall_label">Twitter Wall</string>
     <string name="logout">Logout</string>
     <string name="refresh">Refresh</string>
     <string name="compose">Compose</string>
