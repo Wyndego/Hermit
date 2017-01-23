@@ -44,12 +44,12 @@ public class TweetDataUtility {
     };
 
 
-    public static ContentValues generateRandomTweet() {
+    public static ContentValues generateRandomTweet(long earliestPostTime) {
         Random rand = new Random();
 
         long currentTime = System.currentTimeMillis();
-        long earliestTimestampToGenerate = currentTime - WEEK_IN_MS;
-        long timestamp = earliestTimestampToGenerate + (Math.abs(rand.nextLong()) % (currentTime - earliestTimestampToGenerate) );
+        long earliestTimestampToGenerate = currentTime - earliestPostTime;
+        long timestamp = earliestPostTime + (Math.abs(rand.nextLong()) % (currentTime - earliestTimestampToGenerate) );
 
         return generateTweet(
                 Math.abs(rand.nextLong()),
@@ -65,14 +65,19 @@ public class TweetDataUtility {
 
     }
 
-    public static ContentValues[] generateRandomTweets(int numTweets) {
-        if (numTweets <= 0) {
-            return null;
+    public static ContentValues[] generateRandomTweets(long earliestPostTime) {
+        Random rand = new Random();
+
+        int numTweets = rand.nextInt(10);
+
+        // Cover the first load so that there will be data.
+        if (earliestPostTime < WEEK_IN_MS) {
+            earliestPostTime = WEEK_IN_MS;
         }
 
         ContentValues[] resultArray = new ContentValues[numTweets];
         for (int i = 0; i < numTweets; i++) {
-            resultArray[i] = generateRandomTweet();
+            resultArray[i] = generateRandomTweet(earliestPostTime);
         }
 
         return resultArray;

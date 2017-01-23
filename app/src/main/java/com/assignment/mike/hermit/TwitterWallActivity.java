@@ -55,6 +55,8 @@ public class TwitterWallActivity
 
 
     private TweetAdapter mTweetAdapter;
+    private long lastFetchTime = 0;
+
     public TwitterWallActivity() {
 
     }
@@ -106,7 +108,7 @@ public class TwitterWallActivity
     public void onStart() {
         super.onStart();
 
-//        fetchNewTweets();
+        fetchNewTweets();
     }
 
     @Override
@@ -135,6 +137,24 @@ public class TwitterWallActivity
         mTweetAdapter.swapCursor(null);
     }
 
+    public void onNewTweetData() {
+        getSupportLoaderManager().restartLoader(TWEET_LOADER, null, this);
+    }
+
+    private void updateLoader() {
+        long sinceLastWeek = System.currentTimeMillis() - TweetDataUtility.WEEK_IN_MS;
+        String sortAndLimit = TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " DESC LIMIT 50";
+
+        Cursor cursor = getContentResolver().query(
+                TweetContract.TweetEntry.CONTENT_URI,
+                TWEET_COLUMNS,
+                TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " > ?",
+                new String[]{Long.toString(sinceLastWeek)},
+                sortAndLimit
+        );
+        mTweetAdapter.swapCursor(cursor);
+    }
+
     private void fetchNewTweets() {
         FetchTweetTask fetchTweetTask = new FetchTweetTask();
         fetchTweetTask.execute();
@@ -142,6 +162,9 @@ public class TwitterWallActivity
 
     private void deleteTweets() {
         int deletedRecords = getContentResolver().delete(TweetContract.TweetEntry.CONTENT_URI, null, null);
+        if (deletedRecords > 0) {
+            updateLoader();
+        }
         Log.d(LOG_TAG, "Deleted this many tweets: " + deletedRecords);
     }
 
@@ -152,11 +175,19 @@ public class TwitterWallActivity
         protected String[] doInBackground(Void... params) {
             Log.d(LOG_TAG, "Fetching the tweet data from HTTP call.");
 
-            ContentValues[] data = TweetDataUtility.generateRandomTweets(30);
+            ContentValues[] data = TweetDataUtility.generateRandomTweets(lastFetchTime);
+            lastFetchTime = System.currentTimeMillis();
 
             // Now that we have the data, inert it to the Tweet DB.
             getContentResolver().bulkInsert(
                     TweetContract.TweetEntry.CONTENT_URI, data
+            );
+
+            // Also perform cleanup on old tweets we no longer care about
+            int deletedRecords = getContentResolver().delete(
+                    TweetContract.TweetEntry.CONTENT_URI,
+                    TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " < ?",
+                    new String[]{Long.toString(System.currentTimeMillis() - TweetDataUtility.WEEK_IN_MS)}
             );
 
             String[] result = new String[data.length];
@@ -165,16 +196,14 @@ public class TwitterWallActivity
             }
             return result;
         }
-//
-//        @Override
-//        protected void onPostExecute(String[] result) {
-//            if (result != null) {
-//                mTweetAdapter.clear();
-//                for (String tweet : result) {
-//                    mTweetAdapter.add(tweet);
-//                }
-//            }
-//        }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if (result != null) {
+                // Update the loader with new cursor data for fetched tweets
+                updateLoader();
+            }
+        }
     }
 
 
