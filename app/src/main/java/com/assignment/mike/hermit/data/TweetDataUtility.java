@@ -49,11 +49,11 @@ public class TweetDataUtility {
 
         long currentTime = System.currentTimeMillis();
         long earliestTimestampToGenerate = currentTime - earliestPostTime;
-        long timestamp = earliestPostTime + (Math.abs(rand.nextLong()) % (currentTime - earliestTimestampToGenerate) );
+        long timestamp = earliestPostTime + (Math.abs((long)rand.nextDouble()) * (currentTime - earliestTimestampToGenerate) );
 
         return generateTweet(
                 Math.abs(rand.nextLong()),
-                getRandomPartionOfTestData(MAX_DISPLAY_NAME_LENGTH),
+                getRandomPartionOfTestData(MAX_DISPLAY_NAME_LENGTH).replaceAll("(\\r|\\n)", ""),
                 "@" + getRandomPartionOfTestData(MAX_HANDLE_LENGTH).replaceAll("\\s+",""),
                 ICON_LIST[rand.nextInt(ICON_LIST.length)],
                 timestamp,
