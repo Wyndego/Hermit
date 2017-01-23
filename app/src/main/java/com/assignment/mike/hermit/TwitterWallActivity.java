@@ -1,6 +1,5 @@
 package com.assignment.mike.hermit;
 
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -9,12 +8,11 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.assignment.mike.hermit.data.TweetContract;
@@ -61,65 +59,52 @@ public class TwitterWallActivity
 
 
     private TweetAdapter mTweetAdapter;
-    private ProgressDialog mFetchNewTweetDialog;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private CursorLoader mCursorLoader;
 
     private long lastFetchTime = 0;
-    private boolean fetchingNewTweetsFromServer;
-    private int mLastRecordedFirstVisibleItem = -1;
-    private int mLastListViewTop;
-    private boolean isScrollingUp;
 
     public TwitterWallActivity() {
 
     }
 
+
+    @Override
+    protected void onPause() {
+        if (mCursorLoader != null) {
+            mCursorLoader.cancelLoadInBackground();
+        }
+
+        Loader loader = getSupportLoaderManager().getLoader(TWEET_LOADER);
+        if (loader != null) {
+            CursorLoader cl = (CursorLoader)loader;
+            cl.cancelLoadInBackground();
+        }
+        super.onPause();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_main);
 
         mTweetAdapter = new TweetAdapter(this, null, 0);
 
-        setContentView(R.layout.fragment_main);
-        final ListView listView = (ListView) findViewById(R.id.listview_tweet);
-        listView.setAdapter(mTweetAdapter);
-        // add a scroll listener to detect reaching the top or bottom of the view
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        // Setup the swipe refresh controls.
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.main_swipe_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (listView.getFirstVisiblePosition() == 0 && isScrollingUp) {
-                    fetchNewTweets();
-                    mLastRecordedFirstVisibleItem = -1;
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-                View childView = view.getChildAt(0);
-                int top = (childView == null) ? 0 : childView.getTop();
-
-                if (firstVisibleItem == mLastRecordedFirstVisibleItem) {
-                    if (top > mLastListViewTop) {
-                        isScrollingUp = true;
-                    } else if (top < mLastListViewTop) {
-                        isScrollingUp = false;
-                    }
-                } else {
-                    if (firstVisibleItem < mLastRecordedFirstVisibleItem) {
-                        isScrollingUp = true;
-                    } else {
-                        isScrollingUp = false;
-                    }
-                }
-
-                mLastListViewTop = top;
-                mLastRecordedFirstVisibleItem = firstVisibleItem;
-
-                if ((visibleItemCount == (totalItemCount - firstVisibleItem)) && !isScrollingUp) {
-                    Log.d(LOG_TAG, "BOTTOM OF LIST FROM ON SCROLL");
-                }
+            public void onRefresh() {
+                fetchNewTweets();
             }
         });
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryDark,
+                R.color.colorPrimary,
+                R.color.grey);
+
+
+        final ListView listView = (ListView) findViewById(R.id.listview_tweet);
+        listView.setAdapter(mTweetAdapter);
 
         getSupportLoaderManager().initLoader(TWEET_LOADER, null, this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
@@ -136,10 +121,10 @@ public class TwitterWallActivity
 
         int selectedMenuItem = item.getItemId();
         switch (selectedMenuItem) {
-            case R.id.refresh:
+//            case R.id.refresh:
 //                Log.d(LOG_TAG, "Refresh menu option selected");
 //                fetchNewTweets();
-                return true;
+//                return true;
             case R.id.compose:
                 Log.d(LOG_TAG, "Compose menu option selected");
                 return true;
@@ -157,7 +142,6 @@ public class TwitterWallActivity
     public void onStart() {
         super.onStart();
 
-        fetchingNewTweetsFromServer = false;
         fetchNewTweets();
     }
 
@@ -179,13 +163,13 @@ public class TwitterWallActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        clearLoadingDialog();
+        mSwipeRefreshLayout.setRefreshing(false);
         mTweetAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        clearLoadingDialog();
+        mSwipeRefreshLayout.setRefreshing(false);
         mTweetAdapter.swapCursor(null);
     }
 
@@ -195,7 +179,7 @@ public class TwitterWallActivity
     }
 
     private void updateLoader() {
-        clearLoadingDialog();
+        mSwipeRefreshLayout.setRefreshing(false);
 
         long sinceLastWeek = System.currentTimeMillis() - TweetDataUtility.WEEK_IN_MS;
         String sortAndLimit = TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " DESC LIMIT 50";
@@ -211,15 +195,8 @@ public class TwitterWallActivity
     }
 
     private void fetchNewTweets() {
-        if (!fetchingNewTweetsFromServer) {
-            createLoadingDialog("Getting new tweets...");
-
-            FetchTweetTask fetchTweetTask = new FetchTweetTask();
-            fetchTweetTask.execute();
-        } else {
-            Log.d(LOG_TAG, "Already fetching new tweet data.");
-        }
-
+        FetchTweetTask fetchTweetTask = new FetchTweetTask();
+        fetchTweetTask.execute();
     }
 
     private void deleteTweets() {
@@ -228,24 +205,6 @@ public class TwitterWallActivity
             updateLoader();
         }
         Log.d(LOG_TAG, "Deleted this many tweets: " + deletedRecords);
-    }
-
-    private void createLoadingDialog(String message) {
-        mFetchNewTweetDialog = new ProgressDialog(this);
-        mFetchNewTweetDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mFetchNewTweetDialog.setMessage(message);
-        mFetchNewTweetDialog.setIndeterminate(true);
-        mFetchNewTweetDialog.setCanceledOnTouchOutside(false);
-        mFetchNewTweetDialog.show();
-    }
-
-    private void clearLoadingDialog() {
-        if (mFetchNewTweetDialog != null) {
-            mFetchNewTweetDialog.cancel();
-            mFetchNewTweetDialog.hide();
-            mFetchNewTweetDialog = null;
-        }
-
     }
 
     private void logout() {
@@ -263,8 +222,6 @@ public class TwitterWallActivity
             Log.d(LOG_TAG, "Fetching the tweet data from HTTP call.");
 
             String[] result = null;
-
-            fetchingNewTweetsFromServer = true;
 
             Random rand = new Random();
             try {
@@ -291,8 +248,6 @@ public class TwitterWallActivity
             for (int i = 0; i < data.length; i++) {
                 result[i] = TweetDataUtility.convertTweetConentValueToTweet(data[i]).toString();
             }
-
-            fetchingNewTweetsFromServer = false;
 
             return result;
         }
