@@ -20,13 +20,15 @@
         android:layout_height="wrap_content"
         android:hint="@string/username_placeholder"
         android:inputType="textEmailAddress"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:text="gooduser@success.com"/>
 
     <EditText android:id="@+id/edit_password"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:hint="@string/password_placeholder"
-        android:inputType="textPassword"/>
+        android:inputType="textPassword"
+        android:text="success"/>
 
     <Button
         android:id="@+id/btn_login"

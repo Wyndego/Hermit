@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -93,7 +94,7 @@ public class TwitterWallActivity
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                
+
                 View childView = view.getChildAt(0);
                 int top = (childView == null) ? 0 : childView.getTop();
 
@@ -121,6 +122,7 @@ public class TwitterWallActivity
         });
 
         getSupportLoaderManager().initLoader(TWEET_LOADER, null, this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -135,16 +137,14 @@ public class TwitterWallActivity
         int selectedMenuItem = item.getItemId();
         switch (selectedMenuItem) {
             case R.id.refresh:
-                Log.d(LOG_TAG, "Refresh menu option selected");
-                fetchNewTweets();
+//                Log.d(LOG_TAG, "Refresh menu option selected");
+//                fetchNewTweets();
                 return true;
             case R.id.compose:
                 Log.d(LOG_TAG, "Compose menu option selected");
                 return true;
             case R.id.logout:
-                Log.d(LOG_TAG, "Logout menu option selected");
-                // Delete all the data...test:
-                deleteTweets();
+                logout();
                 return true;
             default:
                 Log.d(LOG_TAG, "Uknown menu item selected.");
@@ -187,6 +187,11 @@ public class TwitterWallActivity
     public void onLoaderReset(Loader<Cursor> loader) {
         clearLoadingDialog();
         mTweetAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Do nothing...prevents user from accidentally going back to login screen.
     }
 
     private void updateLoader() {
@@ -241,6 +246,13 @@ public class TwitterWallActivity
             mFetchNewTweetDialog = null;
         }
 
+    }
+
+    private void logout() {
+        // Perform any cleanup tasks here...deleting records, etc.
+
+        // Finally navigate to parent of this app to logout.
+        NavUtils.navigateUpFromSameTask(this);
     }
 
     public class FetchTweetTask extends AsyncTask<Void, Void, String[]> {
