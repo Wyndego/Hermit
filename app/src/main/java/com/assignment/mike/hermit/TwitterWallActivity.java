@@ -62,25 +62,12 @@ public class TwitterWallActivity
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private CursorLoader mCursorLoader;
 
+    private FetchTweetTask mFetchTweetTask;
+
     private long lastFetchTime = 0;
 
     public TwitterWallActivity() {
 
-    }
-
-
-    @Override
-    protected void onPause() {
-        if (mCursorLoader != null) {
-            mCursorLoader.cancelLoadInBackground();
-        }
-
-        Loader loader = getSupportLoaderManager().getLoader(TWEET_LOADER);
-        if (loader != null) {
-            CursorLoader cl = (CursorLoader)loader;
-            cl.cancelLoadInBackground();
-        }
-        super.onPause();
     }
 
     @Override
@@ -146,6 +133,18 @@ public class TwitterWallActivity
     }
 
     @Override
+    protected void onResume() {
+        updateLoader();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        updateLoader();
+        super.onPause();
+    }
+
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // Get the last set of data, stored in the db.
         long sinceLastWeek = System.currentTimeMillis() - TweetDataUtility.WEEK_IN_MS;
@@ -180,6 +179,7 @@ public class TwitterWallActivity
 
     private void updateLoader() {
         mSwipeRefreshLayout.setRefreshing(false);
+        killFetchTweetTask();
 
         long sinceLastWeek = System.currentTimeMillis() - TweetDataUtility.WEEK_IN_MS;
         String sortAndLimit = TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " DESC LIMIT 50";
@@ -194,17 +194,19 @@ public class TwitterWallActivity
         mTweetAdapter.changeCursor(cursor);
     }
 
-    private void fetchNewTweets() {
-        FetchTweetTask fetchTweetTask = new FetchTweetTask();
-        fetchTweetTask.execute();
+    private void killFetchTweetTask() {
+        if (mFetchTweetTask != null) {
+            mFetchTweetTask.cancel(true);
+            mFetchTweetTask = null;
+        }
     }
 
-    private void deleteTweets() {
-        int deletedRecords = getContentResolver().delete(TweetContract.TweetEntry.CONTENT_URI, null, null);
-        if (deletedRecords > 0) {
-            updateLoader();
+    private void fetchNewTweets() {
+        if (mFetchTweetTask == null) {
+            FetchTweetTask fetchTweetTask = new FetchTweetTask();
+            fetchTweetTask.execute();
+            mFetchTweetTask = fetchTweetTask;
         }
-        Log.d(LOG_TAG, "Deleted this many tweets: " + deletedRecords);
     }
 
     private void logout() {
