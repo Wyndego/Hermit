@@ -6,6 +6,7 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.assignment.mike.hermit.data.TweetDataUtility;
@@ -32,7 +33,45 @@ public class TweetAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView tv = (TextView)view;
-        ((TextView) view).setText(TweetDataUtility.convertCursorRowToTweet(cursor).toString());
+
+        // Read in the user icon to find the correct value:
+        String stringVal = cursor.getString(TwitterWallActivity.COL_TWEET_USER_ICON);
+        ImageView iconView = (ImageView) view.findViewById(R.id.user_icon);
+        iconView.setImageResource(TweetDataUtility.getUserIconReferenceFromString(stringVal));
+
+        // Read in the user handle
+        stringVal = cursor.getString(TwitterWallActivity.COL_TWEET_HANDLE);
+        TextView textView = (TextView)view.findViewById(R.id.user_handle_textview);
+        textView.setText(stringVal);
+
+        // Read in the user display name
+        stringVal = cursor.getString(TwitterWallActivity.COL_TWEET_DISPLAY_NAME);
+        textView = (TextView)view.findViewById(R.id.user_display_name_textview);
+        textView.setText(stringVal);
+
+        // Read in the content of the tweet
+        stringVal = cursor.getString(TwitterWallActivity.COL_TWEET_CONTENT);
+        textView = (TextView)view.findViewById(R.id.tweet_content_textview);
+        textView.setText(stringVal);
+
+        // Read the posted time
+        long longVal = cursor.getLong(TwitterWallActivity.COL_TWEET_POST_TIMESTAMP);
+        textView = (TextView)view.findViewById(R.id.post_time_textview);
+        textView.setText(TweetDataUtility.formatTimeString(longVal));
+
+        // Read the number Of replies
+        longVal = cursor.getLong(TwitterWallActivity.COL_TWEET_NUM_REPLIES);
+        textView = (TextView)view.findViewById(R.id.reply_count_textview);
+        textView.setText(Long.toString(longVal));
+
+        // read the number of retweets
+        longVal = cursor.getLong(TwitterWallActivity.COL_TWEET_NUM_RETWEETS);
+        textView = (TextView)view.findViewById(R.id.retweet_count_textview);
+        textView.setText(Long.toString(longVal));
+
+        // read the number of likes
+        longVal = cursor.getLong(TwitterWallActivity.COL_TWEET_NUM_LIKES);
+        textView = (TextView)view.findViewById(R.id.like_count_textview);
+        textView.setText(Long.toString(longVal));
     }
 }

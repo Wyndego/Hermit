@@ -1,10 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/list_item_tweet_textview"
+<!--<TextView xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--android:id="@+id/list_item_tweet_textview"-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:minHeight="?android:attr/listPreferredItemHeight"-->
+<!--android:gravity="center_horizontal"-->
+<!--android:text="HERE IS SOME TEXT@!!!!@!@">-->
+
+<!--</TextView>-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:gravity="center_horizontal"
-    android:text="HERE IS SOME TEXT@!!!!@!@">
+    android:orientation="horizontal">
 
-</TextView>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="10dp">
+
+        <ImageView
+            android:id="@+id/user_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/reply_icon"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_reply_icon" />
+
+            <TextView
+                android:id="@+id/reply_count_textview"
+                android:text="68"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:textAlignment="textStart"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="sans-serif-condensed"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:paddingLeft="5dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/retweet_icon"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_retweet_icon" />
+
+            <TextView
+                android:id="@+id/retweet_count_textview"
+                android:text="5000"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:textAlignment="textStart"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="sans-serif-condensed"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:paddingLeft="5dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/like_icon"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_like_icon" />
+
+            <TextView
+                android:id="@+id/like_count_textview"
+                android:text="10000"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textAlignment="textStart"
+                android:fontFamily="sans-serif-condensed"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:paddingLeft="5dp"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="5"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/user_display_name_textview"
+            android:text="User_Dood"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textColor="@color/black"
+            android:paddingLeft="5dp"/>
+
+        <TextView
+            android:id="@+id/user_handle_textview"
+            android:text="\@somedood"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:textAppearance="?android:textAppearanceSmall"
+            android:paddingLeft="15dp"/>
+
+        <TextView
+            android:id="@+id/tweet_content_textview"
+            android:text="This tweet is not very long but it is long enough. Oh really, are you certain that it has reached 140 characters already? Am I able to fit one more line in here?????????"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10"
+            android:fontFamily="sans-serif-condensed"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:paddingTop="10dp"
+            android:minHeight="100dp"/>
+
+        <TextView
+            android:id="@+id/post_time_textview"
+            android:text="21m"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:fontFamily="sans-serif-condensed"
+            android:textAlignment="textEnd"
+            android:layout_gravity="end"
+            android:textAppearance="?android:textAppearanceSmall"
+            android:paddingRight="25dp"/>
+    </LinearLayout>
+
+</LinearLayout>

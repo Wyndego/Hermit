@@ -37,7 +37,7 @@ public class Tweet {
 
     public Tweet (Cursor cursor) {
         if (cursor != null) {
-            setUserId(cursor.getLong(TwitterWallActivity.COL_TWEET_ID));
+            setUserId(cursor.getLong(TwitterWallActivity.COL_TWEET_USER_ID));
             setHandle(cursor.getString(TwitterWallActivity.COL_TWEET_HANDLE));
             setDisplayName(cursor.getString(TwitterWallActivity.COL_TWEET_DISPLAY_NAME));
             setIconLocation(cursor.getString(TwitterWallActivity.COL_TWEET_USER_ICON));

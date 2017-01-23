@@ -3,6 +3,10 @@ package com.assignment.mike.hermit.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.assignment.mike.hermit.R;
+
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -21,6 +25,12 @@ public class TweetDataUtility {
     private static final int MAX_CONTENT_LENGTH = 135;
 
     public static final long WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
+
+    public static final long SECOND = 1000;
+    public static final long MINUTE = SECOND * 60;
+    public static final long HOUR = MINUTE * 60;
+    public static final long DAY = HOUR * 24;
+
 
     private static final String[] ICON_LIST = new String[] {
             "Sun",
@@ -44,13 +54,13 @@ public class TweetDataUtility {
         return generateTweet(
                 Math.abs(rand.nextLong()),
                 getRandomPartionOfTestData(MAX_DISPLAY_NAME_LENGTH),
-                "@" + getRandomPartionOfTestData(MAX_HANDLE_LENGTH).trim(),
+                "@" + getRandomPartionOfTestData(MAX_HANDLE_LENGTH).replaceAll("\\s+",""),
                 ICON_LIST[rand.nextInt(ICON_LIST.length)],
                 timestamp,
                 getRandomPartionOfTestData(MAX_CONTENT_LENGTH),
-                rand.nextLong() % 5000L,
-                rand.nextLong() % 5000L,
-                rand.nextLong() % 5000L
+                Math.abs(rand.nextLong() % 500L),
+                Math.abs(rand.nextLong() % 500L),
+                Math.abs(rand.nextLong() % 500L)
                 );
 
     }
@@ -109,12 +119,68 @@ public class TweetDataUtility {
         return result;
     }
 
+    // Simulates an image server where these user icons may be stored.
+    public static int getUserIconReferenceFromString(String iconString) {
+        int result = R.mipmap.ic_launcher;
+
+        if (iconString == null || iconString.length() == 0) {
+            return result;
+        }
+
+        if (iconString.equals("Sun")) {
+            result = R.mipmap.ic_sun;
+        } else if (iconString.equals("Moon")) {
+            result = R.mipmap.ic_moon;
+        } else if (iconString.equals("Star")) {
+            result = R.mipmap.ic_star;
+        } else if (iconString.equals("Cat")) {
+            result = R.mipmap.ic_cat;
+        } else if (iconString.equals("Dog")) {
+            result = R.mipmap.ic_dog;
+        } else if (iconString.equals("Person")) {
+            result = R.mipmap.ic_person;
+        } else if (iconString.equals("Plane")) {
+            result = R.mipmap.ic_plane;
+        } else if (iconString.equals("Circle")) {
+            result = R.mipmap.ic_circle;
+        }
+
+        return result;
+    }
+
+    public static String formatTimeString(long timestamp) {
+        long currentTime = System.currentTimeMillis();
+        long difference = currentTime - timestamp;
+
+        if (difference < 0) {
+            return "now";
+        }
+
+        if (difference < SECOND) {
+            return "now";
+        } else if (difference < MINUTE) {
+            String value = Long.toString(difference/SECOND);
+            return value + "s";
+        } else if (difference < HOUR) {
+            String value = Long.toString(difference/MINUTE);
+            return value + "m";
+        } else if (difference < DAY) {
+            String value = Long.toString(difference/HOUR);
+            return value + "h";
+        } else {
+            // Larger than 1 day ago...just return a formatted date.
+            Date date = new Date(timestamp);
+            return DateFormat.getDateInstance().format(date);
+        }
+    }
+
     private static final String getRandomPartionOfTestData(int maxLength) {
         Random rand = new Random();
         int length = rand.nextInt(maxLength) + 5;
         int startIndex = rand.nextInt(testDataLength - length);
 
-        return testData.substring(startIndex, startIndex + length-1);
+        String result = testData.substring(startIndex, startIndex + length-1);
+        return result;
     }
 
 

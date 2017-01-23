@@ -28,27 +28,31 @@ public class TwitterWallActivity
     private static final int TWEET_LOADER = 0;
     private static final String[] TWEET_COLUMNS = {
             TweetContract.TweetEntry._ID,
-            TweetContract.TweetEntry.COLUMN_USER_ICON,
-            TweetContract.TweetEntry.COLUMN_DISPLAY_NAME,
+            TweetContract.TweetEntry.COLUMN_USER_ID,
             TweetContract.TweetEntry.COLUMN_HANDLE,
+            TweetContract.TweetEntry.COLUMN_DISPLAY_NAME,
+            TweetContract.TweetEntry.COLUMN_USER_ICON,
             TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP,
             TweetContract.TweetEntry.COLUMN_CONTENT,
+            TweetContract.TweetEntry.COLUMN_NUM_REPLIES,
             TweetContract.TweetEntry.COLUMN_NUM_RETWEETS,
-            TweetContract.TweetEntry.COLUMN_NUM_LIKES,
-            TweetContract.TweetEntry.COLUMN_NUM_REPLIES
+            TweetContract.TweetEntry.COLUMN_NUM_LIKES
+
     };
 
     // These indices are tied to TWEET_COLUMNS.  If TWEET_COLUMNS changes, these
     // must change.
     public static final int COL_TWEET_ID = 0;
-    public static final int COL_TWEET_USER_ICON = 1;
-    public static final int COL_TWEET_DISPLAY_NAME = 2;
-    public static final int COL_TWEET_HANDLE = 3;
-    public static final int COL_TWEET_POST_TIMESTAMP = 4;
-    public static final int COL_TWEET_CONTENT = 5;
-    public static final int COL_TWEET_NUM_RETWEETS = 6;
-    public static final int COL_TWEET_NUM_LIKES = 7;
-    public static final int COL_TWEET_NUM_REPLIES = 8;
+    public static final int COL_TWEET_USER_ID = 1;
+    public static final int COL_TWEET_HANDLE = 2;
+    public static final int COL_TWEET_DISPLAY_NAME = 3;
+    public static final int COL_TWEET_USER_ICON = 4;
+    public static final int COL_TWEET_POST_TIMESTAMP = 5;
+    public static final int COL_TWEET_CONTENT = 6;
+    public static final int COL_TWEET_NUM_REPLIES = 7;
+    public static final int COL_TWEET_NUM_RETWEETS = 8;
+    public static final int COL_TWEET_NUM_LIKES = 9;
+
 
     private TweetAdapter mTweetAdapter;
     public TwitterWallActivity() {
@@ -88,6 +92,8 @@ public class TwitterWallActivity
                 return true;
             case R.id.logout:
                 Log.d(LOG_TAG, "Logout menu option selected");
+                // Delete all the data...test:
+                deleteTweets();
                 return true;
             default:
                 Log.d(LOG_TAG, "Uknown menu item selected.");
@@ -112,7 +118,7 @@ public class TwitterWallActivity
         return new CursorLoader(
                 this,
                 TweetContract.TweetEntry.CONTENT_URI,
-                null,
+                TWEET_COLUMNS,
                 TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " > ?",
                 new String[]{Long.toString(sinceLastWeek)},
                 sortAndLimit
@@ -132,6 +138,11 @@ public class TwitterWallActivity
     private void fetchNewTweets() {
         FetchTweetTask fetchTweetTask = new FetchTweetTask();
         fetchTweetTask.execute();
+    }
+
+    private void deleteTweets() {
+        int deletedRecords = getContentResolver().delete(TweetContract.TweetEntry.CONTENT_URI, null, null);
+        Log.d(LOG_TAG, "Deleted this many tweets: " + deletedRecords);
     }
 
     public class FetchTweetTask extends AsyncTask<Void, Void, String[]> {
