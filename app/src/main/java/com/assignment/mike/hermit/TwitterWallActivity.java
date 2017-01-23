@@ -165,13 +165,11 @@ public class TwitterWallActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mSwipeRefreshLayout.setRefreshing(false);
         mTweetAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mSwipeRefreshLayout.setRefreshing(false);
         mTweetAdapter.swapCursor(null);
     }
 
@@ -188,7 +186,7 @@ public class TwitterWallActivity
         }
 
         long sinceLastWeek = System.currentTimeMillis() - TweetDataUtility.WEEK_IN_MS;
-        String sortAndLimit = TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " DESC LIMIT 50";
+        String sortAndLimit = TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " DESC LIMIT 150";
 
         Cursor cursor = getContentResolver().query(
                 TweetContract.TweetEntry.CONTENT_URI,
