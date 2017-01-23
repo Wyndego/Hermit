@@ -1,6 +1,5 @@
 package com.assignment.mike.hermit;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -10,7 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import java.util.HashMap;
-import java.util.Random;
+
+import static com.assignment.mike.hermit.Utility.simulateNetworkConditions;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Simulate a call to an authorization service to validate a user.
         if (simulateNetworkConditions()) {
-            displayMessage(NETWORK_ERROR, "Failed to reach server. Please try again.");
+            Utility.displayMessage(this, NETWORK_ERROR, "Failed to reach server. Please try again.");
             return;
         }
 
@@ -71,41 +71,23 @@ public class MainActivity extends AppCompatActivity {
     private boolean validateUser(String username, String password) {
         if (username == null || username.length() == 0 ||
                 password == null || password.length() == 0) {
-            displayMessage(LOGIN_ERROR, "Please provide both a username and a password");
+            Utility.displayMessage(this, LOGIN_ERROR, "Please provide both a username and a password");
             return false;
         }
 
         if (!validUserMap.containsKey(username)) {
-            displayMessage(LOGIN_ERROR, "Invalid username: " + username);
+            Utility.displayMessage(this, LOGIN_ERROR, "Invalid username: " + username);
             return false;
         }
 
         String retrievedPassword = validUserMap.get(username);
         if (retrievedPassword == null || !retrievedPassword.equals(password)) {
-            displayMessage(LOGIN_ERROR, "Password does not match stored value for " + username);
+            Utility.displayMessage(this, LOGIN_ERROR, "Password does not match stored value for " + username);
             return false;
         }
 
         return true;
     }
 
-    private void displayMessage(String title, String message) {
-        AlertDialog.Builder mMessageDialog = new AlertDialog.Builder(this);
-        mMessageDialog.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Noting to do here.
-                    }
-                }).show();
-    }
 
-    private boolean simulateNetworkConditions() {
-        Random rand = new Random();
-        int roll = rand.nextInt(10);
-
-        // 10% chance of network failure.
-        return roll == 0;
-    }
 }

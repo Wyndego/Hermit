@@ -19,17 +19,24 @@ import java.util.Random;
 public class TweetDataUtility {
 
     private static final String LOG_TAG = TweetDataUtility.class.getSimpleName();
-    private static final String DUMMY_TEXT_FILE = "dummy_text.txt";
     private static final int MAX_HANDLE_LENGTH = 20;
     private static final int MAX_DISPLAY_NAME_LENGTH = 20;
     private static final int MAX_CONTENT_LENGTH = 135;
 
+    public static final int MAX_TWEET_LENGTH = 140;
     public static final long WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
 
     public static final long SECOND = 1000;
     public static final long MINUTE = SECOND * 60;
     public static final long HOUR = MINUTE * 60;
     public static final long DAY = HOUR * 24;
+
+    // Variables to simulate our current user...normally this would be handled via the login
+    // and retrieval of a user account:
+    public static final long CURRENT_USER_ID = 24601L;
+    public static final String CURRENT_USER_HANDLE = "@gooduser";
+    public static final String CURRENT_USER_DISPLAY_NAME = "Some Dood";
+    public static final String CURRENT_USER_ICON = "CurrentUserIcon";
 
 
     private static final String[] ICON_LIST = new String[] {
@@ -126,7 +133,7 @@ public class TweetDataUtility {
 
     // Simulates an image server where these user icons may be stored.
     public static int getUserIconReferenceFromString(String iconString) {
-        int result = R.mipmap.ic_launcher;
+        int result = R.mipmap.ic_default_user;
 
         if (iconString == null || iconString.length() == 0) {
             return result;
@@ -148,6 +155,8 @@ public class TweetDataUtility {
             result = R.mipmap.ic_plane;
         } else if (iconString.equals("Circle")) {
             result = R.mipmap.ic_circle;
+        } else if (iconString.equals(CURRENT_USER_ICON)) {
+            result = R.mipmap.ic_launcher;
         }
 
         return result;

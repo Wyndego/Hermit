@@ -1,6 +1,7 @@
 package com.assignment.mike.hermit;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -9,10 +10,13 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.assignment.mike.hermit.data.TweetContract;
@@ -77,6 +81,12 @@ public class TwitterWallActivity
 
         mTweetAdapter = new TweetAdapter(this, null, 0);
 
+        final ListView listView = (ListView) findViewById(R.id.listview_tweet);
+        listView.setAdapter(mTweetAdapter);
+
+        getSupportLoaderManager().initLoader(TWEET_LOADER, null, this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
         // Setup the swipe refresh controls.
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.main_swipe_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -88,13 +98,6 @@ public class TwitterWallActivity
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryDark,
                 R.color.colorPrimary,
                 R.color.grey);
-
-
-        final ListView listView = (ListView) findViewById(R.id.listview_tweet);
-        listView.setAdapter(mTweetAdapter);
-
-        getSupportLoaderManager().initLoader(TWEET_LOADER, null, this);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -113,7 +116,7 @@ public class TwitterWallActivity
 //                fetchNewTweets();
 //                return true;
             case R.id.compose:
-                Log.d(LOG_TAG, "Compose menu option selected");
+                addPost();
                 return true;
             case R.id.logout:
                 logout();
@@ -134,13 +137,13 @@ public class TwitterWallActivity
 
     @Override
     protected void onResume() {
-        updateLoader();
+        updateLoader(false);
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        updateLoader();
+        updateLoader(true);
         super.onPause();
     }
 
@@ -177,9 +180,12 @@ public class TwitterWallActivity
         // Do nothing...prevents user from accidentally going back to login screen.
     }
 
-    private void updateLoader() {
+    private void updateLoader(boolean killAsyncTask) {
         mSwipeRefreshLayout.setRefreshing(false);
-        killFetchTweetTask();
+
+        if (killAsyncTask) {
+            killFetchTweetTask();
+        }
 
         long sinceLastWeek = System.currentTimeMillis() - TweetDataUtility.WEEK_IN_MS;
         String sortAndLimit = TweetContract.TweetEntry.COLUMN_POST_TIMESTAMP + " DESC LIMIT 50";
@@ -214,6 +220,67 @@ public class TwitterWallActivity
 
         // Finally navigate to parent of this app to logout.
         NavUtils.navigateUpFromSameTask(this);
+    }
+
+    // Provides UI to enter a new tweet and sends the data to the
+    // fake server to be stored.
+    private void addPost() {
+        final EditText postEditText = new EditText(this);
+        postEditText.setHint("Enter post...");
+        postEditText.requestFocus();
+        postEditText.setFilters(new InputFilter[] {
+                new InputFilter.LengthFilter(TweetDataUtility.MAX_TWEET_LENGTH)
+        });
+
+        new AlertDialog.Builder(this, R.style.HermitAlertDialogStyle)
+                .setTitle("New Post")
+                .setView(postEditText)
+                .setPositiveButton("Post", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String post = postEditText.getText().toString();
+                        sendPost(post);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Just let it close the widget.
+                    }
+                })
+                .show();
+    }
+
+    // Does the send of the post to the server, if successful, this
+    // post will be inserted in the db.
+    private void sendPost(String message) {
+        if (message == null || message.length() == 0 ||
+                message.length() > TweetDataUtility.MAX_TWEET_LENGTH) {
+            Utility.displayMessage(this,
+                    "Post Declined", "A post must be between 0 and " + TweetDataUtility.MAX_TWEET_LENGTH +
+                    " characters.");
+        }
+
+        // Check for network connection:
+        if (Utility.simulateNetworkConditions()) {
+            Utility.displayMessage(this, "Network Error", "Please retry your request");
+        }
+
+        // Assume the tweet was posted here, so now we add it to our db.
+        getContentResolver().insert(
+                TweetContract.TweetEntry.CONTENT_URI,
+                TweetDataUtility.generateTweet(
+                        TweetDataUtility.CURRENT_USER_ID,
+                        TweetDataUtility.CURRENT_USER_DISPLAY_NAME,
+                        TweetDataUtility.CURRENT_USER_HANDLE,
+                        TweetDataUtility.CURRENT_USER_ICON,
+                        System.currentTimeMillis(),
+                        message,
+                        0L,
+                        0L,
+                        0L
+                )
+        );
+
+        fetchNewTweets();
     }
 
     public class FetchTweetTask extends AsyncTask<Void, Void, String[]> {
@@ -258,7 +325,7 @@ public class TwitterWallActivity
         protected void onPostExecute(String[] result) {
             if (result != null) {
                 // Update the loader with new cursor data for fetched tweets
-                updateLoader();
+                updateLoader(true);
             }
         }
     }
